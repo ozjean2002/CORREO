@@ -1,0 +1,68 @@
+﻿@page "/"
+@inject IJSRuntime JS
+@using BlazorApp2.Helpers
+@using MailKit;
+@using MimeKit;
+@using System.Net.Mail;
+@using System.Configuration;
+@using System.Net;
+@using System.Security.Cryptography.X509Certificates;
+@using System.Net.Security;
+@using Data.model;
+@using Data.service;
+@inject IEmailService EmailService;
+
+<body>
+
+
+
+    <button type="button" class="btn btn-primary" @onclick="enviar">ENVIAR</button>
+
+
+
+</body>
+
+
+@code {
+
+    private IEnumerable<Email> email;
+
+    Email EmailOne = new Email();
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        email = await EmailService.GetAll();
+    }
+
+
+
+    public async Task enviar()
+
+
+    {
+
+        await JS.Messages("ENVIADO", "Los detalles de su compra han sido enviados.", IJSExtensions.TypeMessageSweetAlert.success);
+
+        MailMessage correo = new MailMessage();
+
+        correo.From = new MailAddress("jpool982010@gmail.com", "JEAN", System.Text.Encoding.UTF8);//Correo de salida
+        correo.To.Add("oz2002jean@gmail.com"); //Correo destino?
+        correo.Subject = "NOTIFICACION DE COMPRA"; //Asunto
+        correo.Body = "<b>Usted ha realizado una compra en GAMERTECHNOLOGY, muchas gracias por su compra, su pedido llegara en el tiempo estimado, hasta la proxima!.</b>"; //Mensaje del correo
+        correo.IsBodyHtml = true;
+        correo.Priority = MailPriority.Normal;
+        SmtpClient smtp = new SmtpClient();
+        smtp.UseDefaultCredentials = false;
+        smtp.Host = "smtp.gmail.com"; //Host del servidor de correo
+        smtp.Port = 25; //Puerto de salida
+        smtp.Credentials = new System.Net.NetworkCredential("jpool982010@gmail.com", "527204je18");//Cuenta de correo
+        ServicePointManager.ServerCertificateValidationCallback = delegate (object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) { return true; };
+        smtp.EnableSsl = true;//True si el servidor de correo permite ssl
+        smtp.Send(correo);
+
+      
+    }
+
+}
+ 
